@@ -10,30 +10,30 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 
-@WebServlet("/cardapio")
-public class CardapioServlet extends HttpServlet {
+@WebServlet("/editar-pizza")
+public class EditarPizzaServlet extends HttpServlet {
     @Inject
     private CardapioDAO cardapioDAO;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Pizza> pizzas = cardapioDAO.getCardapio();
-        request.setAttribute("cardapio", pizzas);
-        request.getRequestDispatcher("cardapio.jsp").forward(request, response);
+        String nome = request.getParameter("nome");
+        Pizza pizza = cardapioDAO.getPizza(nome);
+        request.setAttribute("pizza", pizza);
+        request.getRequestDispatcher("editar-pizza.jsp").forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String nome = request.getParameter("nome");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String nomeAntigo = request.getParameter("nomeAntigo");
+        String nomeNovo = request.getParameter("nome");
         String ingredientes = request.getParameter("ingredientes");
         Double preco = Double.parseDouble(request.getParameter("preco"));
 
-        Pizza pizza = new Pizza(nome, ingredientes, preco, "");
+        Pizza pizza = new Pizza(nomeNovo, ingredientes, preco, "");
+        cardapioDAO.atualizarPizza(nomeAntigo, pizza);
 
-        cardapioDAO.adicionarPizza(pizza);
-
-        response.sendRedirect("cardapio");
+        response.sendRedirect(request.getContextPath() + "/cardapio");
     }
 }
